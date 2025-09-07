@@ -14,26 +14,7 @@ int main()
     double *my_matrix;
     double tmp;
 
-    ifstream file;
 
-    file.open("matrix.txt");
-
-    int* iter = NULL;
-    if (file.is_open()){
-        file >> nrows;
-        file >> ncols;
-        int* iter = (int*) calloc(ncols, sizeof(int));
-        for (int i=0; i<ncols; i++) {
-            iter[i] = 1;
-        }
-        
-    }
-    else{
-        cout << "Unable to open file." << endl;
-    }
-
-    file.close();
-    
     MPI_Init(NULL,NULL);
 
     int err;
@@ -44,7 +25,7 @@ int main()
 
     int localResults;
 
-    // ifstream file;
+    ifstream file;
     
     // Guardar la matriz. Código del Profesor.
 
@@ -70,11 +51,11 @@ int main()
 
         // Inicializar un vector de 1's
         int localVector[ncols];
-        for (int n = 0; n < ncols; n++){
-            localVector[n] = iter[n + world_rank];
-            printf("%d ", localVector[n]);
+        //for (int n = 0; n < ncols; n++){
+        //    localVector[n] = iter[n + world_rank];
+        //    printf("%d ", localVector[n]);
             // cout << "Rank: " << world_rank << ", localVector[" << n << "] = " << localVector[n] << endl;
-        }
+        //}
         
         // Guardado del bloque de la matriz
         int my_firstrow = firstIndex;
