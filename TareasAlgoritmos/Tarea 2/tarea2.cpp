@@ -13,9 +13,11 @@ int main()
     ifstream file;
 
     int nrows, ncols;
-    double *my_matrix;
+    double *my_matrix, *b_k;
     double tmp;
-    
+    int indiceVector, tamañoVector;
+    int *localVector;
+    int firstIndex, localRows;
 
     file.open("matrix.txt");
 
@@ -31,8 +33,6 @@ int main()
     file.close();
 
     MPI_Init(NULL,NULL);
-
-    int err;
 
     int world_size, world_rank;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
@@ -53,20 +53,20 @@ int main()
         }
         
         // Partir vector b_0
-        int indiceVector, tamañoVector;
+
         tamañoVector = ncols / world_size;
         indiceVector = world_rank * (ncols / world_size);
         if (world_rank == world_size -1){
             tamañoVector += ncols % world_size;
         }
-        int localVector[tamañoVector];
+        localVector = new int [tamañoVector];
         for (int n = 0; n < tamañoVector; n++){
             localVector[n] = b_0[n + indiceVector];
             printf("%d ", localVector[n]);
             cout << "Rank: " << world_rank << ", localVector[" << n << "] = " << localVector[n] << endl;
         }
 
-        int firstIndex, localRows;
+        // Dimensiones matriz
         localRows = nrows / world_size;
         firstIndex = world_rank * (nrows / world_size) + 1;
         if (world_rank == world_size - 1){
@@ -91,17 +91,6 @@ int main()
             cout << "Rank" << world_rank << ", " << i << " " << my_matrix[i] << endl;
         }
 
-        // MatVec visto en ayudantía
-        int* b_k = (int*) calloc(tamañoVector, sizeof(int));
-        printf("Rank %i, empezando local mat vec\n", world_rank);
-	    for (int i=0; i<localRows; i++) {
-            for (int j=0; j<tamañoVector; j++) {
-                b_k[j] += my_matrix[i * ncols + j] * localVector[j];
-                cout << world_rank << "->" << b_k[j] << endl;
-            }
-	    }
-        printf("Rank %i, terminó local mat vec\n", world_rank);
-
         file.close();
     }
     else
@@ -109,16 +98,53 @@ int main()
         cout << "Unable to open file." << endl;
     }
 
+    // Comunicación para obtener el vector completo a utilizar. Código de ayudantía.
+    b_k = new double [ncols];
+    int recvcounts[world_size];
+    int offsets[world_size];
+    int err;
+    for (int i = 0; i < world_size; i++)
+    {
+        recvcounts[i] = tamañoVector;
+        if (i == world_size - 1){
+            recvcounts[i] += ncols % world_size;
+        }
+        offsets[i] = tamañoVector;
+        if (i > 0)
+        {
+            offsets[i] += offsets[i-1];
+        }
+        else { offsets[i] = 0; }
+    }
+    err = MPI_Allgatherv(localVector, tamañoVector, MPI_INT, b_k, recvcounts, offsets, MPI_INT, MPI_COMM_WORLD);
+    // int MPI_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+    //                void *recvbuf, const int *recvcounts, const int *displs,
+    //                MPI_Datatype recvtype, MPI_Comm comm)
+    for (int l = 0; l < ncols; l++) {
+        printf("%f ", b_k[l]);
+    }
+    
+    
+    // MatVec visto en ayudantía
+
+    //int* b_k = (int*) calloc(tamañoVector, sizeof(int));
+    //printf("Rank %i, empezando local mat vec\n", world_rank);
+	//for (int i=0; i<localRows; i++) {
+    //    for (int j=0; j<tamañoVector; j++) {
+    //        VARIABLE[j] += my_matrix[i * ncols + j] * localVector[j];
+    //        cout << j << "->" << b_k[j] << endl;
+    //    }
+	//}
+    //printf("Rank %i, terminó local mat vec\n", world_rank);
 
 
 
 
     // Dejar al final del código para liberar memoria. 
     delete[] my_matrix;
-    
+    delete[] localVector;
+    delete[] b_k;
 
-
-// Paralelizar cálculos.
 
     MPI_Finalize();
     return 0;
