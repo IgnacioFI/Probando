@@ -105,7 +105,7 @@ int main()
     {
         cout << "Unable to open file." << endl;
     }
-
+    double inicio = MPI_Wtime();
     while (true) {
         ++itr;
     // Comunicación para obtener el vector completo a utilizar. Código de ayudantía.
@@ -114,16 +114,16 @@ int main()
         int offsets[world_size];
         for (int i = 0; i < world_size; i++)
         {
-            recvcounts[i] = tamañoVector;
+            recvcounts[i] = nrows / world_size;
             if (i == world_size - 1){
                 recvcounts[i] += ncols % world_size;
             }
-            offsets[i] = tamañoVector;
-            if (i > 0)
-            {
-                offsets[i] += offsets[i-1];
-            }
-            else { offsets[i] = 0; }
+            offsets[i] = i * (ncols / world_size);
+            //if (i > 0)
+            //{
+            //    offsets[i] += offsets[i-1];
+            //}
+            //else { offsets[i] = 0; }
         }
 
         MPI_Allgatherv(localVector, tamañoVector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -165,6 +165,7 @@ int main()
         //print_vector(localVector, localRows, world_rank, normado);
 
     // Calcular valor propio actual y error
+        
         MPI_Allgatherv(b_k_p, tamañoVector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
         resultado_parcial = new double[localRows];
     // MatVec A_p * b_k_p
@@ -188,14 +189,19 @@ int main()
         localVector = b_k_p;
     // Juntar vector b_{k+1} si error < 10^{-5} o 1000 iteraciones -> Se convierte en b_k de la siguiente iteración.
         
-        if (error < pow(10, -5) or itr == 5) {
+        if (error < pow(10, -5) or itr == 1000) {
             if (world_rank == 0) {
-                const char* conf = "b_{k+1} completo";
-                print_vector(b_k, ncols, world_rank, conf);
+                //const char* conf = "b_{k+1} completo";
+                //#print_vector(b_k, ncols, world_rank, conf);
                 cout << "Iteración: " << itr << "\nValor propio: " << valor_propio << "\nError: " << error << endl;
-            }
+                }
             break;
         }
+    }
+    double fin = MPI_Wtime();
+    double t = fin - inicio;
+    if (world_rank == 0) {
+        cout << "Tiempo total: " << t << endl;
     }
 
     // Dejar al final del código para liberar memoria. 
@@ -206,5 +212,6 @@ int main()
 
 
     MPI_Finalize();
+
     return 0;
 }
