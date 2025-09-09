@@ -1,5 +1,5 @@
 // Tarea 2: Ignacio Fullerton Infante
-// Compilar: mpic++ -std=c++11 tarea2.cpp -o tarea2
+// Compilar: mpic++ -std=c++11 tarea2.cpp
 // Ejecutar: mpirun -np 3 tarea2
 
 

@@ -13,7 +13,7 @@
 echo "start script"
 date
 
-mpic++ tarea2.cpp
+mpic++ -std=c++11 tarea2.cpp
 time mpirun -np 8 a.out
 
 echo "end script"
