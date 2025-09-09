@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <mpi.h>
+#include <cmath> //Se puede utilizar?
 using namespace std;
 
 void print_vector(double* vector, int n, int rank, const char* text) {
@@ -22,9 +23,10 @@ int main()
 
     int nrows, ncols;
     double *my_matrix, *localVector, *b_k, *resultado_parcial;
-    double tmp;
-    int indiceVector, tamañoVector;
-    int firstIndex, localRows;
+    double tmp, error, vp_k;
+    int indiceVector, tamañoVector, firstIndex, localRows;
+    int itr, com0, com1, com2, com3;
+    double norma, norma_parcial;
 
     file.open("matrix.txt");
 
@@ -69,7 +71,7 @@ int main()
         for (int n = 0; n < tamañoVector; n++){
             localVector[n] = b_0[n + indiceVector];
             //printf("%f ", localVector[n]);
-            cout << "Rank: " << world_rank << ", localVector[" << n << "] = " << localVector[n] << endl;
+            //cout << "Rank: " << world_rank << ", localVector[" << n << "] = " << localVector[n] << endl;
         }
 
         // Dimensiones matriz
@@ -78,7 +80,7 @@ int main()
         if (world_rank == world_size - 1){
             localRows += nrows % world_size;
         }
-        cout << "Rank: " << world_rank << ", first index: " << firstIndex << ", local size: " << localRows << endl;
+        //cout << "Rank: " << world_rank << ", first index: " << firstIndex << ", local size: " << localRows << endl;
 
         // Guardado del bloque de la matriz
         int my_firstrow = firstIndex;
@@ -94,7 +96,7 @@ int main()
         cout << "Store matrix elements" << endl;
         for (int i=0; i<localRows*ncols; i++) {
             file >> my_matrix[i];
-            cout << "Rank" << world_rank << ", " << i << " " << my_matrix[i] << endl;
+            //cout << "Rank" << world_rank << ", " << i << " " << my_matrix[i] << endl;
         }
 
         file.close();
@@ -123,36 +125,68 @@ int main()
         else { offsets[i] = 0; }
     }
 
-    err = MPI_Allgatherv(localVector, tamañoVector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
+    com0 = MPI_Allgatherv(localVector, tamañoVector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
     // int MPI_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
     //                void *recvbuf, const int *recvcounts, const int *displs,
     //                MPI_Datatype recvtype, MPI_Comm comm)
     
-    const char* text4 = "full vector";
+    const char* text4 = "b_k";
     print_vector(b_k, ncols, world_rank, text4);
     
     
     // MatVec visto en ayudantía
-    //resultado_parcial = new double [localRows];
     printf("Rank %i, empezando local mat vec\n", world_rank);
 	for (int i=0; i<localRows; i++) {
         for (int j=0; j<ncols; j++) {
             localVector[i] += my_matrix[i * ncols + j] * b_k[j];
-            cout << j << "->" << resultado_parcial[j] << endl;
+            //cout << j << "->" << localVector[j] << endl;
         }
 	}
     printf("Rank %i, terminó local mat vec\n", world_rank);
-    const char* text0 = "Resultado parcial";
-    print_vector(localVector, localRows, world_rank, text0);
+    const char* parcial = "b_k+1 parcial";
+    print_vector(localVector, localRows, world_rank, parcial);
     
-    // Juntar vector b_{k+1}
-    int err0;
-    err0 = MPI_Allgatherv(localVector, localRows, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
-    if (world_rank == 0) {
-        const char* conf = "b_{k+1}";
-        print_vector(b_k, ncols, world_rank, conf);
+    // Falta la norma de la multiplicación.
+    for (int i = 0; i < localRows; i++) {
+        norma_parcial += pow(localVector[i], 2);
     }
+ 
+    com3 = MPI_Allreduce(&norma_parcial, &norma, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    norma = sqrt(norma);
+    for (int i = 0; i < localRows; i++) {
+        localVector[i] = localVector[i] / norma;
+    }
+    const char* normado = "b_k+1 parcial Normado";
+    print_vector(localVector, localRows, world_rank, normado);
 
+    // Calcular error
+    resultado_parcial = new double[localRows];
+    // MatVec A_p * b_k_p
+    for (int i=0; i<localRows; i++) {
+        for (int j=0; j<ncols; j++) {
+            resultado_parcial[i] += my_matrix[i * ncols + j] * localVector[j];
+            //cout << j << "->" << resultado_parcial[j] << endl;
+        }
+	}
+    // (b_k)^T * resultado anterior
+    for (int i = 0; i < localRows; i++) {
+        vp_k += localVector[i] * resultado_parcial[i];
+    }
+    // Obtener la suma total
+    error = 0;
+    com1 = MPI_Allreduce(&vp_k, &error, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    error = fabs(10 - error);
+    //cout << "Rank: " << world_rank << ", global sum after allreduce: " << error << endl;
+
+    // Juntar vector b_{k+1} si error < 10^{-5} o 1000 iteraciones
+ 
+    com1 = MPI_Allgatherv(localVector, localRows, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
+    if (world_rank == 0) {
+        const char* conf = "b_{k+1} completo";
+        print_vector(b_k, ncols, world_rank, conf);
+        cout << "Error actual: " << error << endl;
+    }
+    
 
 
 
