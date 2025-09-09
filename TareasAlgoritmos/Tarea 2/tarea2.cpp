@@ -8,15 +8,22 @@
 #include <mpi.h>
 using namespace std;
 
+void print_vector(double* vector, int n, int rank, const char* text) {
+    printf("\nRank %i, %s:\n", rank, text);
+    for (int i = 0; i < n; i++) {
+        printf("%f ", vector[i]);
+    }
+    printf("\n\n");
+}
+
 int main()
 {   // While o for para iterar el código.
     ifstream file;
 
     int nrows, ncols;
-    double *my_matrix, *b_k;
+    double *my_matrix, *localVector, *b_k, *resultado_parcial;
     double tmp;
     int indiceVector, tamañoVector;
-    int *localVector;
     int firstIndex, localRows;
 
     file.open("matrix.txt");
@@ -28,7 +35,6 @@ int main()
     for (int i = 0; i < ncols; i++){
         b_0[i] = 1;
     }
-    // int b_k[ncols]
 
     file.close();
 
@@ -59,10 +65,10 @@ int main()
         if (world_rank == world_size -1){
             tamañoVector += ncols % world_size;
         }
-        localVector = new int [tamañoVector];
+        localVector = new double [tamañoVector];
         for (int n = 0; n < tamañoVector; n++){
             localVector[n] = b_0[n + indiceVector];
-            printf("%d ", localVector[n]);
+            //printf("%f ", localVector[n]);
             cout << "Rank: " << world_rank << ", localVector[" << n << "] = " << localVector[n] << endl;
         }
 
@@ -116,26 +122,36 @@ int main()
         }
         else { offsets[i] = 0; }
     }
-    err = MPI_Allgatherv(localVector, tamañoVector, MPI_INT, b_k, recvcounts, offsets, MPI_INT, MPI_COMM_WORLD);
+
+    err = MPI_Allgatherv(localVector, tamañoVector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
     // int MPI_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
     //                void *recvbuf, const int *recvcounts, const int *displs,
     //                MPI_Datatype recvtype, MPI_Comm comm)
-    for (int l = 0; l < ncols; l++) {
-        printf("%f ", b_k[l]);
-    }
+    
+    const char* text4 = "full vector";
+    print_vector(b_k, ncols, world_rank, text4);
     
     
     // MatVec visto en ayudantía
-
-    //int* b_k = (int*) calloc(tamañoVector, sizeof(int));
-    //printf("Rank %i, empezando local mat vec\n", world_rank);
-	//for (int i=0; i<localRows; i++) {
-    //    for (int j=0; j<tamañoVector; j++) {
-    //        VARIABLE[j] += my_matrix[i * ncols + j] * localVector[j];
-    //        cout << j << "->" << b_k[j] << endl;
-    //    }
-	//}
-    //printf("Rank %i, terminó local mat vec\n", world_rank);
+    //resultado_parcial = new double [localRows];
+    printf("Rank %i, empezando local mat vec\n", world_rank);
+	for (int i=0; i<localRows; i++) {
+        for (int j=0; j<ncols; j++) {
+            localVector[i] += my_matrix[i * ncols + j] * b_k[j];
+            cout << j << "->" << resultado_parcial[j] << endl;
+        }
+	}
+    printf("Rank %i, terminó local mat vec\n", world_rank);
+    const char* text0 = "Resultado parcial";
+    print_vector(localVector, localRows, world_rank, text0);
+    
+    // Juntar vector b_{k+1}
+    int err0;
+    err0 = MPI_Allgatherv(localVector, localRows, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
+    if (world_rank == 0) {
+        const char* conf = "b_{k+1}";
+        print_vector(b_k, ncols, world_rank, conf);
+    }
 
 
 
