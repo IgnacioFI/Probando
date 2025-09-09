@@ -3,7 +3,7 @@
 # Nombre del trabajo
 #SBATCH --job-name=IMT2112
 # Archivo de salida
-#SBATCH --output=matrix_%j.txt
+#SBATCH --output=matrix.txt
 # Cola de trabajo
 #SBATCH --partition=full
 # Solicitud de cpus
