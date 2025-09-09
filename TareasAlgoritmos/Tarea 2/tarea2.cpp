@@ -15,19 +15,19 @@ void print_vector(double* vector, int n, int rank, const char* text) {
         printf("%f ", vector[i]);
     }
     printf("\n\n");
-}
+} // Función extraída de ayudantía.
 
 int main()
-{   // While o for para iterar el código.
+{   
     ifstream file;
 
     int nrows, ncols;
     double *my_matrix, *localVector, *b_k, *resultado_parcial;
     double tmp, error, vp_k;
     int indiceVector, tamañoVector, firstIndex, localRows;
-    int itr, com0, com1, com2, com3;
+    int com; // Comunicación
     double norma, norma_parcial;
-
+    int itr = 0;
     file.open("matrix.txt");
 
     file >> nrows;
@@ -105,12 +105,14 @@ int main()
     {
         cout << "Unable to open file." << endl;
     }
-
+    while (itr < 1000 or pow(10, -5) < error) {
+        ++itr
+        
+    }
     // Comunicación para obtener el vector completo a utilizar. Código de ayudantía.
     b_k = new double [ncols];
     int recvcounts[world_size];
     int offsets[world_size];
-    int err;
     for (int i = 0; i < world_size; i++)
     {
         recvcounts[i] = tamañoVector;
@@ -125,7 +127,7 @@ int main()
         else { offsets[i] = 0; }
     }
 
-    com0 = MPI_Allgatherv(localVector, tamañoVector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
+    com = MPI_Allgatherv(localVector, tamañoVector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
     // int MPI_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
     //                void *recvbuf, const int *recvcounts, const int *displs,
     //                MPI_Datatype recvtype, MPI_Comm comm)
@@ -151,7 +153,7 @@ int main()
         norma_parcial += pow(localVector[i], 2);
     }
  
-    com3 = MPI_Allreduce(&norma_parcial, &norma, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    com = MPI_Allreduce(&norma_parcial, &norma, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     norma = sqrt(norma);
     for (int i = 0; i < localRows; i++) {
         localVector[i] = localVector[i] / norma;
@@ -174,13 +176,13 @@ int main()
     }
     // Obtener la suma total
     error = 0;
-    com1 = MPI_Allreduce(&vp_k, &error, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    com = MPI_Allreduce(&vp_k, &error, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     error = fabs(10 - error);
     //cout << "Rank: " << world_rank << ", global sum after allreduce: " << error << endl;
 
     // Juntar vector b_{k+1} si error < 10^{-5} o 1000 iteraciones
  
-    com1 = MPI_Allgatherv(localVector, localRows, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
+    com = MPI_Allgatherv(localVector, localRows, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
     if (world_rank == 0) {
         const char* conf = "b_{k+1} completo";
         print_vector(b_k, ncols, world_rank, conf);
@@ -194,6 +196,7 @@ int main()
     delete[] my_matrix;
     delete[] localVector;
     delete[] b_k;
+    delete[] resultado_parcial;
 
 
     MPI_Finalize();
