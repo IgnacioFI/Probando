@@ -23,7 +23,7 @@ int main()
 
     int nrows, ncols;
     double *my_matrix, *localVector, *b_k, *resultado_parcial;
-    double tmp, error, vp_k;
+    double tmp, error, vp_p;
     int indiceVector, tamañoVector, firstIndex, localRows;
     double norma, norma_parcial;
     int itr = 0;
@@ -66,6 +66,7 @@ int main()
         if (world_rank == world_size -1){
             tamañoVector += ncols % world_size;
         }
+        //cout << "Rank: " << world_rank << "\nTamaño de su vector: " << tamañoVector << endl;
         localVector = new double [tamañoVector];
         for (int n = 0; n < tamañoVector; n++){
             localVector[n] = b_0[n + indiceVector];
@@ -172,19 +173,19 @@ int main()
             }
 	    }
     // (b_k)^T * resultado anterior
-        vp_k = 0;
+        vp_p = 0;
         for (int i = 0; i < localRows; i++) {
-            vp_k += localVector[i] * resultado_parcial[i];
+            vp_p += localVector[i] * resultado_parcial[i];
         }
     // Obtener la suma total
         double valor_propio = 0;
-        MPI_Allreduce(&vp_k, &valor_propio, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        MPI_Allreduce(&vp_p, &valor_propio, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         error = fabs(10 - valor_propio);
         //cout << "Rank: " << world_rank << ", global sum after allreduce: " << error << endl;
 
     // Juntar vector b_{k+1} si error < 10^{-5} o 1000 iteraciones -> Se convierte en b_k de la siguiente iteración.
         MPI_Allgatherv(localVector, tamañoVector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
-        if (error < pow(10, -5) or itr == 5) {
+        if (error < pow(10, -5) or itr == 1) {
             if (world_rank == 0) {
                 const char* conf = "b_{k+1} completo";
                 print_vector(b_k, ncols, world_rank, conf);
