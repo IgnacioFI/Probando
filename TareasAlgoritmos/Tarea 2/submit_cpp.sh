@@ -11,10 +11,10 @@
 #SBATCH --cpus-per-task=1
 
 echo "start script"
-date
+//date
 
 mpic++ tarea2.cpp -std=c++11
-mpirun ./a.out
+time mpirun ./a.out
 
 echo "end script"
 date
