@@ -3,7 +3,7 @@
 # Nombre del trabajo
 #SBATCH --job-name=IMT2112
 # Archivo de salida
-#SBATCH --output=a.txt
+#SBATCH --output=log.out
 # Cola de trabajo
 #SBATCH --partition=full
 # Solicitud de cpus
@@ -14,7 +14,7 @@ echo "start script"
 date
 
 mpic++ -std=c++11 tarea2.cpp -o a.out
-time mpirun -np 8 a.out
+time mpirun -np 8 ./a.out
 
 echo "end script"
 date
