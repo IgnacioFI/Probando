@@ -7,7 +7,7 @@
 # Cola de trabajo
 #SBATCH --partition=full
 # Solicitud de cpus
-#SBATCH --ntasks=8
+#SBATCH --ntasks=4
 #SBATCH --cpus-per-task=1
 
 echo "start script"

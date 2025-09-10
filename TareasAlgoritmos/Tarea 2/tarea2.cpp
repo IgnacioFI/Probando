@@ -207,7 +207,7 @@ int main()
     // Dejar al final del código para liberar memoria. 
     delete[] my_matrix;
     delete[] localVector;
-    delete[] b_k;
+    delete[] b_k, b_k_p;
     delete[] resultado_parcial;
 
 
