@@ -1,0 +1,24 @@
+start script
+/var/spool/slurm/d/job496877/slurm_script: line 14: //date: No such file or directory
+--------------------------------------------------------------------------
+[[41661,1],0]: A high-performance Open MPI point-to-point messaging module
+was unable to find any relevant network interfaces:
+
+Module: OpenFabrics (openib)
+  Host: n14
+
+Another transport will be used instead, although this may result in
+lower performance.
+--------------------------------------------------------------------------
+[n14.ing.puc.cl:135803] 3 more processes have sent help message help-mpi-btl-base.txt / btl:no-nics
+[n14.ing.puc.cl:135803] Set MCA parameter "orte_base_help_aggregate" to 0 to see all help / error messages
+Iteración: 10000
+Valor propio: 9.9993
+Error: 0.000700089
+Tiempo total: 1377.84
+
+real	23m8.743s
+user	92m26.338s
+sys	0m7.148s
+end script
+Thu Sep 11 10:41:14 -03 2025
