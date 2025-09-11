@@ -189,7 +189,7 @@ int main()
         localVector = b_k_p;
     // Juntar vector b_{k+1} si error < 10^{-5} o 1000 iteraciones -> Se convierte en b_k de la siguiente iteración.
         
-        if (error < pow(10, -5) or itr == 1000) {
+        if (error < pow(10, -5) or itr == 10000) {
             if (world_rank == 0) {
                 //const char* conf = "b_{k+1} completo";
                 //#print_vector(b_k, ncols, world_rank, conf);
