@@ -24,7 +24,7 @@ int main()
     int nrows, ncols;
     double *my_matrix, *localVector, *b_k, *b_k_p, *resultado_parcial;
     double tmp, error, vp_p;
-    int indiceVector, tamañoVector, firstIndex, localRows;
+    int indiceVector, tamano_vector, firstIndex, localRows;
     double norma, norma_parcial;
     int itr = 0;
     file.open("matrix.txt");
@@ -61,14 +61,14 @@ int main()
         
         // Partir vector b_0
 
-        tamañoVector = ncols / world_size;
+        tamano_vector = ncols / world_size;
         indiceVector = world_rank * (ncols / world_size);
         if (world_rank == world_size -1){
-            tamañoVector += ncols % world_size;
+            tamano_vector += ncols % world_size;
         }
         //cout << "Rank: " << world_rank << "\nTamaño de su vector: " << tamañoVector << endl;
-        localVector = new double [tamañoVector];
-        for (int n = 0; n < tamañoVector; n++){
+        localVector = new double [tamano_vector];
+        for (int n = 0; n < tamano_vector; n++){
             localVector[n] = b_0[n + indiceVector];
             //printf("%f ", localVector[n]);
             //cout << "Rank: " << world_rank << ", localVector[" << n << "] = " << localVector[n] << endl;
@@ -126,7 +126,7 @@ int main()
             //else { offsets[i] = 0; }
         }
 
-        MPI_Allgatherv(localVector, tamañoVector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Allgatherv(localVector, tamano_vector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
         // int MPI_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
         //                void *recvbuf, const int *recvcounts, const int *displs,
         //                MPI_Datatype recvtype, MPI_Comm comm)
@@ -137,7 +137,7 @@ int main()
     
     // MatVec visto en ayudantía
         //printf("Rank %i, empezando local mat vec\n", world_rank);
-        b_k_p = new double[tamañoVector];
+        b_k_p = new double[tamano_vector];
 	    for (int i=0; i<localRows; i++) {
             b_k_p[i] = 0;
             for (int j=0; j<ncols; j++) {
@@ -166,7 +166,7 @@ int main()
 
     // Calcular valor propio actual y error
         
-        MPI_Allgatherv(b_k_p, tamañoVector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Allgatherv(b_k_p, tamano_vector, MPI_DOUBLE, b_k, recvcounts, offsets, MPI_DOUBLE, MPI_COMM_WORLD);
         resultado_parcial = new double[localRows];
     // MatVec A_p * b_k_p
         for (int i=0; i<localRows; i++) {
