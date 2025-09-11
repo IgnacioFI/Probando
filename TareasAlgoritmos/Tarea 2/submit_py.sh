@@ -9,6 +9,9 @@
 # Solicitud de cpus
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
+# Informe
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=ignacio.fullerton@uc.cl
 
 echo "start script"
 date

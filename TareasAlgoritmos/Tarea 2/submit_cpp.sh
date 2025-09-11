@@ -7,8 +7,11 @@
 # Cola de trabajo
 #SBATCH --partition=full
 # Solicitud de cpus
-#SBATCH --ntasks=4
+#SBATCH --ntasks=8
 #SBATCH --cpus-per-task=1
+# Informe
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=ignacio.fullerton@uc.cl
 
 echo "start script"
 //date
