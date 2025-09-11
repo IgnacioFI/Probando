@@ -14,7 +14,7 @@
 #SBATCH --mail-user=ignacio.fullerton@uc.cl
 
 echo "start script"
-//date
+date
 
 mpic++ tarea2.cpp -std=c++11
 time mpirun ./a.out
