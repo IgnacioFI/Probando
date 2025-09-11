@@ -3,7 +3,7 @@
 # Nombre del trabajo
 #SBATCH --job-name=IMT2112
 # Archivo de salida
-#SBATCH --output=log.out
+#SBATCH --output=output_%j.txt
 # Cola de trabajo
 #SBATCH --partition=full
 # Solicitud de cpus
