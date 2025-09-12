@@ -193,7 +193,8 @@ int main()
             if (world_rank == 0) {
                 //const char* conf = "b_{k+1} completo";
                 //#print_vector(b_k, ncols, world_rank, conf);
-                cout << "Iteración: " << itr << "\nValor propio: " << valor_propio << "\nError: " << error << endl;  
+                cout << "Iteración: " << itr << "\nValor propio: " << valor_propio << "\nError: " << error << endl; 
+                cout << "Filas: " << nrows << "\nColumnas: " << ncols << endl;
             }
             char processor_name[MPI_MAX_PROCESSOR_NAME];
             int name_len;
