@@ -12,3 +12,23 @@ lower performance.
 --------------------------------------------------------------------------
 [n14.ing.puc.cl:152503] 7 more processes have sent help message help-mpi-btl-base.txt / btl:no-nics
 [n14.ing.puc.cl:152503] Set MCA parameter "orte_base_help_aggregate" to 0 to see all help / error messages
+Procesador utilizado: n14.ing.puc.cl
+Procesador utilizado: n14.ing.puc.cl
+Procesador utilizado: n14.ing.puc.cl
+Iteración: 1000
+Valor propio: 9.99447
+Error: 0.00552708
+Filas: 20000
+Columnas: 20000
+Procesador utilizado: n14.ing.puc.cl
+Tiempo total: 462.592
+Procesador utilizado: n14.ing.puc.cl
+Procesador utilizado: n14.ing.puc.cl
+Procesador utilizado: n14.ing.puc.cl
+Procesador utilizado: n14.ing.puc.cl
+
+real	8m4.791s
+user	64m14.923s
+sys	0m15.810s
+end script
+Fri Sep 12 10:06:17 -03 2025

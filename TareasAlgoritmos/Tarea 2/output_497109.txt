@@ -10,3 +10,4 @@ Module: OpenFabrics (openib)
 Another transport will be used instead, although this may result in
 lower performance.
 --------------------------------------------------------------------------
+slurmstepd: error: *** JOB 497109 ON n14 CANCELLED AT 2025-09-12T10:08:55 ***
