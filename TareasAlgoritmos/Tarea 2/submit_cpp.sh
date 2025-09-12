@@ -7,7 +7,7 @@
 # Cola de trabajo
 #SBATCH --partition=full
 # Solicitud de cpus
-#SBATCH --ntasks=1
+#SBATCH --ntasks=2
 #SBATCH --cpus-per-task=1
 # Informe
 #SBATCH --mail-type=ALL
