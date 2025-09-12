@@ -1,0 +1,25 @@
+start script
+Fri Sep 12 12:36:00 -03 2025
+--------------------------------------------------------------------------
+[[54759,1],0]: A high-performance Open MPI point-to-point messaging module
+was unable to find any relevant network interfaces:
+
+Module: OpenFabrics (openib)
+  Host: n14
+
+Another transport will be used instead, although this may result in
+lower performance.
+--------------------------------------------------------------------------
+Iteración: 1000
+Valor propio: 9.99308
+Error: 0.00692262
+Filas: 2500
+Columnas: 2500
+Procesador utilizado: n14.ing.puc.cl
+Tiempo total: 32.9258
+
+real	0m35.893s
+user	0m35.512s
+sys	0m0.167s
+end script
+Fri Sep 12 12:36:37 -03 2025

@@ -1,0 +1,34 @@
+start script
+Fri Sep 12 12:51:46 -03 2025
+--------------------------------------------------------------------------
+[[55244,1],0]: A high-performance Open MPI point-to-point messaging module
+was unable to find any relevant network interfaces:
+
+Module: OpenFabrics (openib)
+  Host: n14
+
+Another transport will be used instead, although this may result in
+lower performance.
+--------------------------------------------------------------------------
+[n14.ing.puc.cl:157450] 7 more processes have sent help message help-mpi-btl-base.txt / btl:no-nics
+[n14.ing.puc.cl:157450] Set MCA parameter "orte_base_help_aggregate" to 0 to see all help / error messages
+Iteración: 1000
+Valor propio: 9.9958
+Error: 0.00420447
+Filas: 10000
+Columnas: 10000
+Procesador utilizado: n14.ing.puc.cl
+Tiempo total: 106.43
+Procesador utilizado: n14.ing.puc.cl
+Procesador utilizado: n14.ing.puc.cl
+Procesador utilizado: n14.ing.puc.cl
+Procesador utilizado: n14.ing.puc.cl
+Procesador utilizado: n14.ing.puc.cl
+Procesador utilizado: n14.ing.puc.cl
+Procesador utilizado: n14.ing.puc.cl
+
+real	1m52.229s
+user	14m50.719s
+sys	0m4.459s
+end script
+Fri Sep 12 12:53:39 -03 2025
