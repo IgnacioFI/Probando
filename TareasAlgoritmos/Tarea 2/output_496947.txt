@@ -1,0 +1,10 @@
+start script
+Thu Sep 11 15:10:13 -03 2025
+/var/spool/slurm/d/job496947/slurm_script: line 19: mpic++: command not found
+/var/spool/slurm/d/job496947/slurm_script: line 20: mpirun: command not found
+
+real	0m0.004s
+user	0m0.000s
+sys	0m0.002s
+end script
+Thu Sep 11 15:10:13 -03 2025
