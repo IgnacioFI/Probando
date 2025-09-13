@@ -1,0 +1,30 @@
+start script
+Sat Sep 13 11:11:58 -03 2025
+Procesador utilizado: n8.ing.puc.cl
+Iteración: 1000
+Valor propio: 9.85031
+Error: 0.14969
+Filas: 50000
+Columnas: 50000
+Procesador utilizado: n8.ing.puc.cl
+Tiempo total: 4753.67
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+Procesador utilizado: n8.ing.puc.cl
+
+real	82m22.220s
+user	1293m46.151s
+sys	19m4.416s
+end script
+Sat Sep 13 12:34:21 -03 2025
