@@ -52,7 +52,7 @@ float* mat_vec_par(float *norte, float *sur, float *este, float *oeste, float *c
 {
     float *result = (float*)calloc(n, sizeof(float));
 
-    #pragma omp parallel for //num_threads(4)
+    #pragma omp parallel for num_threads(10)
     for (int j = 1; j < y; j++)
     {
         for (int i = 1; i < x; i++)
@@ -138,6 +138,7 @@ int main(){
         // Producto interno paralelizable
         ro_0 = ro_1;
         ro_1 = 0;
+        #pragma omp parallel for num_threads(20) reduction(+:ro_1) // Extraído de ayudantía
         for (int k = 0; k < dim; k++){
             ro_1 += array_r[k] * array_z[k];
         }
@@ -148,6 +149,7 @@ int main(){
         else {
             beta = ro_1 / ro_0;
             // Iteración paralelizable
+            #pragma omp parallel for num_threads(20) schedule(static) // Extraído de ayudantía
             for (int k = 0; k < dim; k++) {
                 array_p[k] = array_z[k] + beta * array_p[k];
             }
@@ -158,6 +160,7 @@ int main(){
         
         // Paralelizable
         float denominador = 0;
+        #pragma omp parallel for num_threads(20) reduction(+:denominador) // Extraído de ayudantía
         for (int k = 0; k < dim; k++) {
             denominador += (array_p[k] * array_q[k]);
         }
@@ -165,6 +168,7 @@ int main(){
         // cout << "Delta: " << delta <<endl;
 
         // Paralelizable
+        #pragma omp parallel for num_threads(20) schedule(static) // Extraído de ayudantía
         for (int k = 0; k < dim; k++) {
             if (k % N_x != 0 && k % N_y != 0) {
                 array_x[k] -= delta * array_p[k];
@@ -172,22 +176,24 @@ int main(){
         }
 
         // Paralelizable
+        #pragma omp parallel for num_threads(20) schedule(static) // Extraído de ayudantía
         for (int k = 0; k < dim; k++) {
             array_r[k] -= delta * array_q[k];
         }
 
         // Paralelizable
         norma_r = 0;
+        #pragma omp parallel for num_threads(20) reduction(+:norma_r) // Extraído de ayudantía
         for (int k = 0; k < dim; k++) {
             norma_r += array_r[k] * array_r[k];
         }
-
+        norma_r = sqrt(norma_r);
         // cout << "\nVector x:\n" << endl;
         // print_vector(array_x, dim);
         // cout << "Norma:" << norma_r << endl;
 
 
-        if (sqrt(norma_r) < pow(10, -6)) {
+        if (norma_r < pow(10, -6)) {
             // cout << "\nVector x:\n" << endl;
             // print_vector(array_x, dim);
             break;
