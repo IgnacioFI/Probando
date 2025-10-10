@@ -73,7 +73,7 @@ void print_vector(float* vector, int n)
 {
     for (int i = 0; i < n; i++)
     {
-        printf("%f\n", vector[i]);
+        printf("%f\t", vector[i]);
     }
     printf("\n\n");
 }
@@ -81,8 +81,8 @@ void print_vector(float* vector, int n)
 int main(){
     // Definiciones de las variables a utilizar
 
-    int N_x = 4;
-    int N_y = 4;
+    int N_x = 600;
+    int N_y = 500;
     int dim = (N_x + 1) * (N_y + 1);
     float h_x = (float)1 / N_x;
     float h_y = (float)1 / N_y;
@@ -101,7 +101,7 @@ int main(){
     float* array_p = (float*) calloc(dim, sizeof(float));
     float* array_q = (float*) calloc(dim, sizeof(float));
 
-    
+    float norma_r;
     float ro_0;
     float ro_1 = 0;
     float beta;
@@ -131,12 +131,13 @@ int main(){
         }
     }
 
-    for (int iter = 0; iter < 10; iter++) {
-        cout << "Iteración: " << iter << endl;
+    for (int iter = 0; iter < 2000; iter++) {
+        // cout << "Iteración: " << iter << endl;
         memcpy(array_z, array_r, dim * sizeof(float)); // Función entregada por Perplexity para copiar arreglos.
 
         // Producto interno paralelizable
         ro_0 = ro_1;
+        ro_1 = 0;
         for (int k = 0; k < dim; k++){
             ro_1 += array_r[k] * array_z[k];
         }
@@ -151,7 +152,7 @@ int main(){
                 array_p[k] = array_z[k] + beta * array_p[k];
             }
         }
-
+        // cout << "Beta: " << beta <<endl;
         // Matvec paralelo
         array_q = mat_vec_par(array_norte, array_sur, array_este, array_oeste, array_centro, array_p, dim, N_x, N_y);
         
@@ -160,11 +161,14 @@ int main(){
         for (int k = 0; k < dim; k++) {
             denominador += (array_p[k] * array_q[k]);
         }
-        delta += ro_1 / denominador;
+        delta = ro_1 / denominador;
+        // cout << "Delta: " << delta <<endl;
 
         // Paralelizable
         for (int k = 0; k < dim; k++) {
-            array_x[k] -= delta * array_p[k];
+            if (k % N_x != 0 && k % N_y != 0) {
+                array_x[k] -= delta * array_p[k];
+            }
         }
 
         // Paralelizable
@@ -173,19 +177,24 @@ int main(){
         }
 
         // Paralelizable
-        int norma_r = 0;
+        norma_r = 0;
         for (int k = 0; k < dim; k++) {
             norma_r += array_r[k] * array_r[k];
         }
 
-        cout << "\nVector x:\n" << endl;
-        print_vector(array_x, dim);
+        // cout << "\nVector x:\n" << endl;
+        // print_vector(array_x, dim);
+        // cout << "Norma:" << norma_r << endl;
 
-        if (sqrt(norma_r) < pow(10, -4)) {
+
+        if (sqrt(norma_r) < pow(10, -6)) {
+            // cout << "\nVector x:\n" << endl;
+            // print_vector(array_x, dim);
             break;
         }
     }
-
+    
+    cout << "Norma:" << norma_r << endl;
 
 
     free(array_centro);
