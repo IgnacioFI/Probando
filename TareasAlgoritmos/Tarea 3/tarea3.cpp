@@ -3,7 +3,7 @@
 // Ejecutar: ./name_output
 
 
-#include <vector>
+#include <vector> // Los gráficos fueron creados por Perplexity
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -53,7 +53,7 @@ float* mat_vec_par(float *norte, float *sur, float *este, float *oeste, float *c
 {
     float *result = (float*)calloc(n, sizeof(float));
 
-    #pragma omp parallel for num_threads(10)
+    #pragma omp parallel for num_threads(20)
     for (int j = 1; j < y; j++)
     {
         for (int i = 1; i < x; i++)
@@ -119,7 +119,7 @@ int main(){
 
 
     // Inicializar vector b y matriz A
-    #pragma omp parallel for num_threads(10)
+    #pragma omp parallel for num_threads(20)
     for (int j = 1; j < N_y; j++){
         for (int i = 1; i < N_x; i++){
             int k = j * (N_x + 1) + i;
@@ -128,15 +128,15 @@ int main(){
 
             array_b[k] += func(x, y, cx, cy, sx, sy);
             array_r[k] -= array_b[k];
-            array_centro[k] += calc_centro(x, y, h_x, h_y);
-            array_norte[k] += calc_norte(x, y, h_x, h_y);
-            array_este[k] += calc_este(x, y, h_x, h_y);
-            array_oeste[k] += calc_oeste(x, y, h_x, h_y);
-            array_sur[k] += calc_sur(x, y, h_x, h_y);
+            array_centro[k] += calc_centro(i, j, h_x, h_y);
+            array_norte[k] += calc_norte(i, j, h_x, h_y);
+            array_este[k] += calc_este(i, j, h_x, h_y);
+            array_oeste[k] += calc_oeste(i, j, h_x, h_y);
+            array_sur[k] += calc_sur(i, j, h_x, h_y);
         }
     }
 
-    for (int iter = 0; iter < 1000; iter++) {
+    for (int iter = 0; iter < 2000; iter++) {
         // cout << "Iteración: " << iter << endl;
         memcpy(array_z, array_r, dim * sizeof(float)); // Función entregada por Perplexity para copiar arreglos.
 
@@ -212,7 +212,7 @@ int main(){
     
 
     // Al finalizar, exporta los vectores a archivo para graficar (por ejemplo, en formato CSV)
-    std::ofstream outfile("hist_convergencia.csv");
+    std::ofstream outfile("hist_convergencia_20.csv");
     if (!outfile) {
     std::cerr << "No se puede abrir el archivo de salida.\n";
     }
@@ -222,7 +222,7 @@ int main(){
             outfile << iter_history[i] << "," << error_history[i] << "\n";
         }
         outfile.close();
-        std::cout << "Guardado el historial en hist_convergencia.csv\n";
+        std::cout << "Guardado el historial en hist_convergencia_20.csv\n";
     }
 
     cout << "Norma:" << norma_r << endl;
