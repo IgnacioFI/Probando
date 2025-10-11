@@ -53,7 +53,7 @@ float* mat_vec_par(float *norte, float *sur, float *este, float *oeste, float *c
 {
     float *result = (float*)calloc(n, sizeof(float));
 
-    #pragma omp parallel for num_threads(20)
+    #pragma omp parallel for num_threads(10)
     for (int j = 1; j < y; j++)
     {
         for (int i = 1; i < x; i++)
@@ -81,6 +81,8 @@ void print_vector(float* vector, int n)
 
 int main(){
     // Definiciones de las variables a utilizar
+
+    int hilos = 0;
 
     int N_x = 600;
     int N_y = 500;
@@ -119,7 +121,7 @@ int main(){
 
 
     // Inicializar vector b y matriz A
-    #pragma omp parallel for num_threads(20)
+    #pragma omp parallel for num_threads(hilos)
     for (int j = 1; j < N_y; j++){
         for (int i = 1; i < N_x; i++){
             int k = j * (N_x + 1) + i;
@@ -143,7 +145,7 @@ int main(){
         // Producto interno paralelizable
         ro_0 = ro_1;
         ro_1 = 0;
-        #pragma omp parallel for num_threads(20) reduction(+:ro_1) // Extraído de ayudantía
+        #pragma omp parallel for num_threads(hilos) reduction(+:ro_1) // Extraído de ayudantía
         for (int k = 0; k < dim; k++){
             ro_1 += array_r[k] * array_z[k];
         }
@@ -154,7 +156,7 @@ int main(){
         else {
             beta = ro_1 / ro_0;
             // Iteración paralelizable
-            #pragma omp parallel for num_threads(20) schedule(static) // Extraído de ayudantía
+            #pragma omp parallel for num_threads(hilos) schedule(static) // Extraído de ayudantía
             for (int k = 0; k < dim; k++) {
                 array_p[k] = array_z[k] + beta * array_p[k];
             }
@@ -165,7 +167,7 @@ int main(){
         
         // Paralelizable
         float denominador = 0;
-        #pragma omp parallel for num_threads(20) reduction(+:denominador) // Extraído de ayudantía
+        #pragma omp parallel for num_threads(hilos) reduction(+:denominador) // Extraído de ayudantía
         for (int k = 0; k < dim; k++) {
             denominador += (array_p[k] * array_q[k]);
         }
@@ -173,7 +175,7 @@ int main(){
         // cout << "Delta: " << delta <<endl;
 
         // Paralelizable
-        #pragma omp parallel for num_threads(20) schedule(static) // Extraído de ayudantía
+        #pragma omp parallel for num_threads(hilos) schedule(static) // Extraído de ayudantía
         for (int k = 0; k < dim; k++) {
             if (k % N_x != 0 && k % N_y != 0) {
                 array_x[k] -= delta * array_p[k];
@@ -181,14 +183,14 @@ int main(){
         }
 
         // Paralelizable
-        #pragma omp parallel for num_threads(20) schedule(static) // Extraído de ayudantía
+        #pragma omp parallel for num_threads(hilos) schedule(static) // Extraído de ayudantía
         for (int k = 0; k < dim; k++) {
             array_r[k] -= delta * array_q[k];
         }
 
         // Paralelizable
         norma_r = 0;
-        #pragma omp parallel for num_threads(20) reduction(+:norma_r) // Extraído de ayudantía
+        #pragma omp parallel for num_threads(hilos) reduction(+:norma_r) // Extraído de ayudantía
         for (int k = 0; k < dim; k++) {
             norma_r += array_r[k] * array_r[k];
         }
@@ -212,7 +214,7 @@ int main(){
     
 
     // Al finalizar, exporta los vectores a archivo para graficar (por ejemplo, en formato CSV)
-    std::ofstream outfile("hist_convergencia_20.csv");
+    std::ofstream outfile("hist_convergencia_10.csv");
     if (!outfile) {
     std::cerr << "No se puede abrir el archivo de salida.\n";
     }
@@ -222,7 +224,7 @@ int main(){
             outfile << iter_history[i] << "," << error_history[i] << "\n";
         }
         outfile.close();
-        std::cout << "Guardado el historial en hist_convergencia_20.csv\n";
+        std::cout << "Guardado el historial en hist_convergencia_10.csv\n";
     }
 
     cout << "Norma:" << norma_r << endl;

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # Lee el archivo csv (ajusta el nombre si es diferente)
-data = pd.read_csv('hist_convergencia_10.csv')
+data = pd.read_csv('hist_convergencia_40.csv')
 
 # Extrae las columnas de iteración y error
 iterations = data['Iteracion']
@@ -14,7 +14,7 @@ plt.plot(iterations, errors, marker='o', linestyle='-', label='Error por iteraci
 plt.yscale('log')
 plt.xlabel('Iteración')
 plt.ylabel('Error (norma del residuo)')
-plt.title('Convergencia del algoritmo (10 hilos)')
+plt.title('Convergencia del algoritmo (40 hilos)')
 plt.legend()
 plt.grid(True, which="both", ls="--")
 plt.tight_layout()
