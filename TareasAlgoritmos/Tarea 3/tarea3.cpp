@@ -3,6 +3,7 @@
 // Ejecutar: ./name_output
 
 
+#include <vector>
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -26,25 +27,25 @@ float alpha(float x, float y) {
 }
 
 float calc_centro(int x, int y, float h_x, float h_y) {
-    float primero = (float)(alpha(x - 0.5, y) + alpha(x + 0.5, y)) / (h_x * h_x);
-    float segundo = (float)(alpha(x, y - 0.5) + alpha(x, y + 0.5)) / (h_y * h_y);
+    float primero = (float)(alpha((x - 0.5) * h_x, y * h_y) + alpha((x + 0.5) * h_x, y * h_y)) / (h_x * h_x);
+    float segundo = (float)(alpha(x * h_x, (y - 0.5) * h_y) + alpha(x * h_x, (y + 0.5) * h_y)) / (h_y * h_y);
     return primero + segundo + 1;
 }
 
 float calc_norte(int x, int y, float h_x, float h_y) {
-    return - (float)alpha(x, y + 0.5) / pow(h_y, 2);
+    return - (float)alpha(x * h_x, (y + 0.5) * h_y) / pow(h_y, 2);
 }
 
 float calc_sur(int x, int y, float h_x, float h_y) {
-    return - (float)alpha(x, y - 0.5) / pow(h_y, 2);
+    return - (float)alpha(x * h_x, (y - 0.5) * h_y) / pow(h_y, 2);
 }
 
 float calc_este(int x, int y, float h_x, float h_y) {
-    return - (float)alpha(x + 0.5, y) / pow(h_x, 2);
+    return - (float)alpha((x + 0.5) * h_x, y * h_y) / pow(h_x, 2);
 }
 
 float calc_oeste(int x, int y, float h_x, float h_y) {
-    return - (float)alpha(x - 0.5, y) / pow(h_x, 2);
+    return - (float)alpha((x - 0.5) * h_x, y * h_y) / pow(h_x, 2);
 }
 
 // Función extraída de ayudantía y modificada para la tarea.
@@ -58,7 +59,7 @@ float* mat_vec_par(float *norte, float *sur, float *este, float *oeste, float *c
         for (int i = 1; i < x; i++)
         {
             int k = j * (x + 1) + i;
-            result[k] += centro[k] * vector[k];
+            result[k] += vector[k] * centro[k];
             result[k] += vector[k + x + 1] * norte[k];
             result[k] += vector[k - x - 1] * sur[k];
             result[k] += vector[k + 1] * este[k];
@@ -112,9 +113,13 @@ int main(){
     float sx = 0.2;
     float sy = 0.1;
     
+    // Vectores para almacenar el número de iteración y el error/residuo correspondiente
+    std::vector<int> iter_history;
+    std::vector<double> error_history;
+
 
     // Inicializar vector b y matriz A
-    // #pragma omp parallel for num_threads(10)
+    #pragma omp parallel for num_threads(10)
     for (int j = 1; j < N_y; j++){
         for (int i = 1; i < N_x; i++){
             int k = j * (N_x + 1) + i;
@@ -131,7 +136,7 @@ int main(){
         }
     }
 
-    for (int iter = 0; iter < 2000; iter++) {
+    for (int iter = 0; iter < 1000; iter++) {
         // cout << "Iteración: " << iter << endl;
         memcpy(array_z, array_r, dim * sizeof(float)); // Función entregada por Perplexity para copiar arreglos.
 
@@ -193,6 +198,11 @@ int main(){
         // cout << "Norma:" << norma_r << endl;
 
 
+        // Guarda historial
+        iter_history.push_back(iter);
+        error_history.push_back(norma_r);
+
+
         if (norma_r < pow(10, -6)) {
             // cout << "\nVector x:\n" << endl;
             // print_vector(array_x, dim);
@@ -200,8 +210,22 @@ int main(){
         }
     }
     
-    cout << "Norma:" << norma_r << endl;
 
+    // Al finalizar, exporta los vectores a archivo para graficar (por ejemplo, en formato CSV)
+    std::ofstream outfile("hist_convergencia.csv");
+    if (!outfile) {
+    std::cerr << "No se puede abrir el archivo de salida.\n";
+    }
+    else {
+        outfile << "Iteracion,Error\n";
+        for (size_t i = 0; i < iter_history.size(); ++i) {
+            outfile << iter_history[i] << "," << error_history[i] << "\n";
+        }
+        outfile.close();
+        std::cout << "Guardado el historial en hist_convergencia.csv\n";
+    }
+
+    cout << "Norma:" << norma_r << endl;
 
     free(array_centro);
     free(array_este);
@@ -219,3 +243,4 @@ int main(){
 
     return 0;
 }
+
